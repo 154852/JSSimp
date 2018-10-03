@@ -10,25 +10,16 @@
         <style>
             html, body {
                 height: 100%;
+                margin: 0;
             }
         </style>
     </head>
     <body>
     </body>
     <script>
-        const context = new SMPLContext();
-        // context.overwrite();
-
-        context.generateDom(function(node) {
-            document.body.appendChild(node);
-            context.rawprint('Current date: ' + new Date().toString());
-            context.rawprint('Current path: ' + window.location.href);
-            context.print('Started!')
-
-            SMPL.thread(async function() {
-                var a = await context.forceInput();
-                context.print(a);
-            });
+        const ctx = simpler(async function() {
+            console.log('What is your name?');
+            console.log('Hello ' + (await this.ctx.input()) + '!');
         });
     </script>
 </html>

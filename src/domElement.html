@@ -1,45 +1,26 @@
 <div id="smpl-box---">
     <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" />
     <style>
+        html, body {
+            height: 99.5%;
+        }
+
         #smpl-box--- {
             height: 100%;
             font-family: 'Source Code Pro', monospace;
-        }
 
-        #smpl-box--- header {
-            text-align: right;
-            width: 100%;
-
-            opacity: 0;
-        }
-
-        #smpl-box--- header svg {
-            height: 1.2em;
-            width: 1.2em;
-            display: inline-block;
-
-            transition: filter 0.5s;
-            -webkit-transition: filter 0.5s;
-            cursor: pointer;
-
-            margin-left: 0.5em;
-        }
-
-        #smpl-box--- svg > * {
-            fill: none;
-            stroke-width: 20; 
-        }
-
-        #smpl-box--- svg:hover {
-            filter: brightness(130%);
-        }
-
-        #smpl-console {
-            tab-size: 4;
+            width: 99%;
+            margin: 0 auto;
+            margin-top: 0.5%;
+            /* padding-top: 1%; */
         }
 
         .tab {
             padding-left: 1em;
+        }
+
+        #smpl-console {
+            overflow: auto;
         }
 
         #smpl-console, #lines {
@@ -57,7 +38,7 @@
             grid-template-columns: 1fr 40fr;
 
             background-color: rgb(231, 231, 231);
-            border-radius: 0.5em;
+            border-radius: 0.5em 0.5em 0 0;
 
             width: 100%;
             min-height: 100%;
@@ -65,11 +46,9 @@
 
         #lines {
             background-color: rgb(245, 245, 245);
-            /* padding-top: 0.5em; */
             text-align: right;
             color: rgb(92, 92, 92);
             border-top-left-radius: 0.5em;
-            /* font-size: inherit; */
         }
 
         #lines div {
@@ -85,34 +64,51 @@
         }
 
         .co { color: #757575; }
-        .str { color: #F39C12; }
+        .str, .str * { color: #F39C12 !important; }
         .num { color: #E91E63; }
         .key { color: #3949AB; }
         .func { color: #00897B; }
         .name { color: #3196B6; }
+
+        #back-to-top {
+            position: fixed;
+            right: 1em;
+            bottom: 1em;
+            height: 2em;
+            width: 2em;
+            background-color: #BDBDBD;
+            text-align: center;
+            border-radius: 1em;
+
+            cursor: pointer;
+
+            transition: 0.5s;
+            -webkit-transition: 0.5s;
+        }
+
+        #back-to-top:hover {
+            filter: brightness(90%);
+        }
+
+        #back-to-top svg {
+            width: 100%;
+            height: 100%;
+        }
     </style>
 
-    <header>
-        <svg width="50" height="50" viewbox="0 0 100 100">
-            <rect width="92" height="92" x="4" y="4" style="stroke: #F44336"></rect>
-        </svg>
-
-        <svg width="50" height="50" viewbox="0 0 100 100">
-            <polygon points="4,96 4,4 96,50" style="stroke: #009933" />
-        </svg>
-
-        <!-- <svg width="50" height="50">
-            <rect width="50" height="50" style="stroke: #F44336"></rect>
-        </svg> -->
-    </header>
     <div id="console-grid">
         <code id="lines">
             <div>1</div>
             <div>2</div>
         </code>
         <code id="smpl-console">
-            <!-- <div>>> Started SMPL!</div> -->
             <div contenteditable="true" id="smpl-input" class="smpl-input-text"></div>
         </code>
+    </div>
+
+    <div id="back-to-top" title="Return to top">
+        <svg viewbox="0 0 100 100" width="100" height="100">
+            <polyline points="20,65 50,35 80,65" style="fill:none; stroke:white; stroke-width: 7"></polyline>
+        </svg>
     </div>
 </div>

@@ -110,12 +110,19 @@ class SMPLContext {
     constructor() {
         const self = this;
         this.domElement = null;
+        this.program = null;
+        this.commands = [];
+        this.commandIndex = 0;
 
         var output, input, lines;
 
         this.initBaseInputHandler = function() {
             self.inputHandler = function(text) {
-                if (text.trim() != '') this.rawprint(SMPL.color(text)).classList.add('code');
+                if (text.trim() != '') {
+                    this.rawprint(SMPL.color(text)).classList.add('code');
+                    self.commands.push(text);
+                    self.commandIndex = self.commands.length;
+                }
                 try {
                     if (text.startsWith('|')) {
                         text = text.substring(1, text.length);
@@ -127,18 +134,23 @@ class SMPLContext {
                         text = eval(text);
                     }
 
+                    if (typeof text == 'object') {
+                        text = JSON.stringify(text);
+                    }
+
                     if (text == null) this.rawprint('<span style="color: black">>> </span>' + text, 'grey');
-                    else this.print(SMPL.color(JSON.stringify(text)));
+                    else this.print(SMPL.color(text.toString()));
                 } catch (exception) {
                     this.error(exception);
                 }
             }
 
+            input.style.color = '';
             input.className = 'code';
         }
 
         this.updateLines = function() {
-            for (var i = 0; i < output.children.length - lines.children.length; i++) {
+            for (var i = 0; i < (output.children.length - lines.children.length); i++) {
                 const div = document.createElement('div');
                 div.innerHTML = lines.children.length + 1;
                 lines.appendChild(div);
@@ -157,6 +169,10 @@ class SMPLContext {
         
                 output.addEventListener('click', function() {
                     input.focus();
+                });
+
+                self.domElement.querySelector('#back-to-top').addEventListener('click', function() {
+                    window.scrollTo(0, 0);
                 });
         
                 input.addEventListener('keydown', function(event) {
@@ -187,12 +203,13 @@ class SMPLContext {
                             return;
                         }
                     }
-
-                    if ((event.keyCode == 13 || event.which == 13) && !event.shiftKey) {
-                        self.inputHandler(input.innerText);
-                        input.innerHTML = '';
-                        event.preventDefault();
-                        return;
+                    if (event.keyCode == 13 || event.which == 13) {
+                        if (!event.shiftKey) {
+                            self.inputHandler(input.innerText);
+                            input.innerHTML = '';
+                            event.preventDefault();
+                            return;
+                        } else self.updateLines();
                     }
 
                     if (event.keyCode == 9 || event.which == 9) {
@@ -206,7 +223,25 @@ class SMPLContext {
                         return;
                     }
 
-
+                    if (!input.innerHTML.trim().startsWith('|') && !input.innerHTML.trim().startsWith('>')) {
+                        if (event.keyCode == 38) {
+                            if (self.commandIndex > 0) {
+                                self.commandIndex -= 1;
+                                input.innerHTML = self.commands[self.commandIndex];
+                            }
+                            return;
+                        }
+    
+                        if (event.keyCode == 40) {
+                            if (self.commandIndex < self.commands.length - 1) {
+                                self.commandIndex += 1;
+                                input.innerHTML = self.commands[self.commandIndex];
+                            } else {
+                                input.innerHTML = '';
+                            }
+                            return;
+                        }
+                    }
                 });
         
                 self.initBaseInputHandler();
@@ -214,7 +249,7 @@ class SMPLContext {
             }, 'GET');
         }
 
-        this.input = function(callback) {
+        this.callbackInput = function(callback) {
             input.className = 'input';
 
             self.inputHandler = function(text) {
@@ -224,13 +259,19 @@ class SMPLContext {
             }
         }
 
-        this.forceInput = function() {
-            input.className = 'input';
+        this.input = function(color) {
+            if (color != null) input.style.color = color;
+            else input.className = 'input';
 
             var string = null;
 
             self.inputHandler = function(text) {
-                if (text.trim() != '') this.rawprint(text).classList.add('input');
+                if (text.trim() != '') {
+                    const element = this.rawprint(text);
+
+                    if (color != null) element.style.color = color;
+                    else element.className = 'input';
+                }
                 this.initBaseInputHandler();
                 string = text;
             }
@@ -247,6 +288,10 @@ class SMPLContext {
 
         this.print = function(text, color) {
             return self.rawprint('<span style="color: black">>> </span> ' + text, color);
+        }
+
+        this.log = function(text1, text2) {
+            return self.rawprint('<span style="color: #1F618D">' + text1 + (text2 == null? '':':') + '</span> ' + (text2 == null? '':text2));
         }
 
         this.error = function(text) {
@@ -268,6 +313,7 @@ class SMPLContext {
         this.clear = function() {
             output.innerHTML = '';
             output.appendChild(input);
+            input.focus();
         }
 
         this.overwrite = function() {
@@ -276,5 +322,48 @@ class SMPLContext {
             console.input = self.forceInput;
             window.clear = self.clear;
         }
+
+        this.runProgram = function(program, name) {
+            this.log('Started program', name);
+            this.program = {func: program, name: name};
+            
+            program.call({
+                ctx: self,
+                breakpoint: async function() {
+                    self.log('Started breakpoint mode for', name);
+
+                    var text = '';
+                    while (text != 'exit') {
+                        text = await self.forceInput('#D35400');
+                        if (text != 'exit') self.log('Data stored in "' + text + '"',  SMPL.color(this[text] + ''));
+                    }
+
+                    self.log('Exited breakpoint mode for', name);
+
+                    resolve(true);
+                }
+            })
+        }
+
+        this.start = function() {
+            this.runProgram(this.program.func, this.program.name);
+        }
     }
+}
+
+function simpler(program, name, overwrite, info) {
+    const context = new SMPLContext();
+    if (overwrite != false) context.overwrite();
+
+    context.generateDom(function(node) {
+        document.body.appendChild(node);
+        if (info != false) {
+            context.log('Current date', new Date().toString());
+            context.log('Current path', window.location.href);
+        }
+
+        context.runProgram(program, name == null? 'root':name);
+    });
+
+    return context;
 }
