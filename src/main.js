@@ -182,6 +182,7 @@ class SMPLContext {
                     const offset = sel.anchorOffset;
                     
                     if (!input.innerHTML.trim().startsWith('>') && !input.innerHTML.trim().startsWith('|')) {
+                        console.log('ok')
                         const dontEnd = ')\'"]}';
                         for (const dontEndEl of dontEnd) {
                             if (event.key == dontEndEl && input.innerHTML.charAt(offset) == dontEndEl) {
