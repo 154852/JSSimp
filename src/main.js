@@ -158,7 +158,7 @@ class SMPLContext {
         }
 
         this.generateDom = function(callback) {
-            SMPL.webCall('/src/domElement.html', function() {
+            SMPL.webCall('../src/domElement.html', function() {
                 self.domElement = document.createElement('div');
                 self.domElement.innerHTML = this.responseText;
                 self.domElement = self.domElement.children[0];
