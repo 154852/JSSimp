@@ -181,8 +181,8 @@ class SMPLContext {
                     var sel = window.getSelection();
                     const offset = sel.anchorOffset;
                     
-                    if (!input.innerHTML.startsWith('>') && !input.innerHTML.startsWith('|')) {
-                        const dontEnd = ')\'"]}'
+                    if (!input.innerHTML.trim().startsWith('>') && !input.innerHTML.trim().startsWith('|')) {
+                        const dontEnd = ')\'"]}';
                         for (const dontEndEl of dontEnd) {
                             if (event.key == dontEndEl && input.innerHTML.charAt(offset) == dontEndEl) {
                                 SMPL.setCursorPos(sel.anchorNode == input? input.childNodes[0]:sel.anchorNode, offset + 1);
