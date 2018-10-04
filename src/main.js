@@ -180,27 +180,29 @@ class SMPLContext {
 
                     var sel = window.getSelection();
                     const offset = sel.anchorOffset;
-
-                    const dontEnd = ')\'"]}'
-                    for (const dontEndEl of dontEnd) {
-                        if (event.key == dontEndEl && input.innerHTML.charAt(offset) == dontEndEl) {
-                            SMPL.setCursorPos(sel.anchorNode == input? input.childNodes[0]:sel.anchorNode, offset + 1);
-                            event.preventDefault();
-                            return;
+                    
+                    if (!input.innerHTML.startsWith('>') && !input.innerHTML.startsWith('|')) {
+                        const dontEnd = ')\'"]}'
+                        for (const dontEndEl of dontEnd) {
+                            if (event.key == dontEndEl && input.innerHTML.charAt(offset) == dontEndEl) {
+                                SMPL.setCursorPos(sel.anchorNode == input? input.childNodes[0]:sel.anchorNode, offset + 1);
+                                event.preventDefault();
+                                return;
+                            }
                         }
-                    }
 
-                    const finish = ['()', '{}', '[]', '""', '\'\''];
-                    for (const toFinish of finish) {
-                        if (event.key == toFinish.charAt(0)) {
-                            input.innerHTML = input.innerHTML.replace('&nbsp;', '\t');
-                            input.innerHTML = input.innerHTML.substring(0, offset) + toFinish + input.innerHTML.substring(offset);
-                            input.innerHTML = input.innerHTML.replace('\t', '&nbsp;');
-    
-                            SMPL.setCursorPos(sel.anchorNode == input? input.childNodes[0]:sel.anchorNode, offset + 1);
-    
-                            event.preventDefault();
-                            return;
+                        const finish = ['()', '{}', '[]', '""', '\'\''];
+                        for (const toFinish of finish) {
+                            if (event.key == toFinish.charAt(0)) {
+                                input.innerHTML = input.innerHTML.replace('&nbsp;', '\t');
+                                input.innerHTML = input.innerHTML.substring(0, offset) + toFinish + input.innerHTML.substring(offset);
+                                input.innerHTML = input.innerHTML.replace('\t', '&nbsp;');
+
+                                SMPL.setCursorPos(sel.anchorNode == input? input.childNodes[0]:sel.anchorNode, offset + 1);
+
+                                event.preventDefault();
+                                return;
+                            }
                         }
                     }
                     if (event.keyCode == 13 || event.which == 13) {
